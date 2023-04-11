@@ -1,8 +1,8 @@
-from fastapi import FastAPI
 import sqlite3
+from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-import json
+import uvicorn
 
 # Підключення до бази даних
 conn = sqlite3.connect(r"C:\Users\Sh1zik\Downloads\nomeroff-net-master\park_base.db")
@@ -15,12 +15,13 @@ data = cursor.fetchall()
 
 # Створення fastapi додатку
 app = FastAPI()
-cars = {'cars':{}}
+
 # Маршрут, який повертає дані у форматі json
 @app.get('/data')
 def get_data():
-    data_list = []
+    cars = {}
     for user in data:
+        id = user[0]
         user_data = {
             'name': user[1],
             'model': user[2],
@@ -29,13 +30,13 @@ def get_data():
             'data_out': user[5],
             'status': user[6]
         }
-        data_list.append(user_data)
-    cars['cars'] = data_list
+        cars[id] = user_data
+    print(cars)
     json_data = jsonable_encoder(cars)
 
     return JSONResponse(content=json_data)
 
 # Запуск fastapi додатку
 if __name__ == '__main__':
-    import uvicorn
+
     uvicorn.run(app, host='127.0.0.1', port=8000)
